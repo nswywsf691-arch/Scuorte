@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>علم التجويد التفاعلي</title>
+  <style>
+    :root {
+      --primary: #0f382c;
+      --secondary: #d4af37;
+      --accent: #e8f5e9;
+      --bg: #f8faf9;
+      --card-bg: #ffffff;
+      --text: #2d3748;
+      --error-bg: #fff5f5;
+      --error-border: #e53e3e;
+      --form-purple: #673ab7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ---------------- شاشة الترحيب ---------------- */
+    #splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(135deg, #09261d 0%, #0f382c 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      transition: opacity 1s ease, visibility 1s ease;
+    }
+
+    .splash-item {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 1s ease;
+    }
+
+    .splash-item.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .basmala {
+      font-size: 1.8rem;
+      color: var(--secondary);
+      font-weight: bold;
+      margin-bottom: 25px;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .center-info {
+      font-size: 1.2rem;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+    }
+
+    .teacher-info {
+      font-size: 1.1rem;
+      color: #cbd5e0;
+      margin-bottom: 25px;
+    }
+
+    .book-title {
+      font-size: 1.5rem;
+      color: var(--secondary);
+      border: 2px solid var(--secondary);
+      padding: 10px 20px;
+      border-radius: 30px;
+      background: rgba(212, 175, 55, 0.1);
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+    }
+
+    /* ---------------- الهيدر والشعار ---------------- */
+    header {
+      position: relative;
+      text-align: center;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #0f382c 0%, #1b5e20 100%);
+      color: #fff;
+      padding: 20px 15px;
+      border-radius: 20px;
+      box-shadow: 0 10px 20px rgba(15, 56, 44, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-logo-container {
+      position: absolute;
+      top: 10px;
+      left: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .header-logo-img {
+      width: 48px;
+      height: 48px;
+      border: 2px solid var(--secondary);
+      border-radius: 50%;
+      object-fit: cover;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .header-logo-text {
+      font-size: 0.65rem;
+      color: var(--secondary);
+      font-weight: bold;
+      margin-top: 3px;
+    }
+
+    .header-title-box {
+      padding-left: 40px;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      color: var(--secondary);
+      margin-bottom: 4px;
+    }
+
+    .tabs-nav {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 15px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 2px;
+      background: #e2e8f0;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.75rem;
+      color: var(--primary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: var(--secondary);
+      border-color: var(--secondary);
+      box-shadow: 0 4px 10px rgba(15, 56, 44, 0.2);
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ---------------- الصورة والمخارج تحتها ---------------- */
+    .image-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+      border: 2px solid var(--secondary);
+    }
+
+    .main-image {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .makharij-buttons-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .makhraj-select-btn {
+      background: #f0e6d2;
+      color: var(--primary);
+      border: 2px solid var(--secondary);
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .makhraj-select-btn:active, .makhraj-select-btn.active-btn {
+      background: var(--primary);
+      color: var(--secondary);
+      transform: scale(0.98);
+    }
+
+    /* ---------------- البطاقات والعناصر ---------------- */
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+      border-top: 4px solid var(--secondary);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .section-subtitle {
+      font-size: 1rem;
+      color: var(--primary);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 5px;
+      margin: 15px 0 10px 0;
+      font-weight: bold;
+    }
+
+    .grid-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .grid-buttons-single {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .sifa-btn {
+      background: #f0e6d2;
+      color: var(--primary);
+      border: 1px solid var(--secondary);
+      padding: 10px 6px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .sifa-btn:active, .sifa-btn.selected {
+      background: var(--secondary);
+      color: #fff;
+      transform: scale(0.98);
+    }
+
+    .letters-list {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .letter-btn {
+      background: #f0e6d2;
+      color: var(--primary);
+      border: 2px solid var(--secondary);
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .letter-btn:active, .letter-btn.selected {
+      background: var(--secondary);
+      color: #fff;
+      transform: scale(1.1);
+    }
+
+    .details-box {
+      background: var(--accent);
+      border-right: 4px solid var(--primary);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
+    .error-box {
+      background: var(--error-bg);
+      border-right: 4px solid var(--error-border);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #742a2a;
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
+    .hint-text {
+      color: #718096;
+      font-size: 0.85rem;
+      text-align: center;
+      margin-top: 5px;
+    }
+
+    /* ---------------- تصميم التبويب الرابع (Google Forms Style) ---------------- */
+    .form-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border-top: 6px solid var(--form-purple);
+    }
+
+    .form-question {
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: #202124;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .form-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #dadce0;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .form-option:hover {
+      background: #f8f9fa;
+    }
+
+    .form-option input[type="radio"] {
+      accent-color: var(--form-purple);
+      width: 18px;
+      height: 18px;
+    }
+
+    .form-submit-btn {
+      width: 100%;
+      background: var(--form-purple);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(103, 58, 183, 0.3);
+      margin-top: 10px;
+    }
+
+    .feedback-correct {
+      background: #e6f4ea;
+      color: #137333;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-top: 8px;
+      font-weight: bold;
+    }
+
+    .feedback-wrong {
+      background: #fce8e6;
+      color: #c5221f;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-top: 8px;
+      font-weight: bold;
+    }
+
+    .score-banner {
+      background: linear-gradient(135deg, #673ab7, #512da8);
+      color: white;
+      text-align: center;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- شاشة الترحيب -->
+  <div id="splash-screen">
+    <div id="step-1" class="splash-item basmala">✨ بسم الله الرحمن الرحيم ✨</div>
+    <div id="step-2" class="splash-item center-info">🕌 مركز بصائر لتحفيظ القرآن</div>
+    <div id="step-2-teacher" class="splash-item teacher-info">إعداد المعلمة: أ. مناهل حسن</div>
+    <div id="step-3" class="splash-item book-title">📖 مذكرة علم التجويد</div>
+  </div>
+
+  <header>
+    <div class="header-logo-container">
+      <img src="logo.png" alt="بصائر" class="header-logo-img">
+      <span class="header-logo-text">بصائر</span>
+    </div>
+
+    <div class="header-title-box">
+      <h1>✨ مذكرة علم التجويد التفاعلية</h1>
+      <p>اختر المخرج من الأزرار الموجودة تحت الصورة</p>
+    </div>
+  </header>
+
+  <!-- أزرار التبويبات -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab('tab1', this)">1: المخارج</button>
+    <button class="tab-btn" onclick="switchTab('tab2', this)">2: الحروف</button>
+    <button class="tab-btn" onclick="switchTab('tab3', this)">3: الصفات</button>
+    <button class="tab-btn" onclick="switchTab('tab4', this)">4: التدريبات</button>
+  </div>
+
+  <main class="container">
+    
+    <!-- التبويب 1: الصورة والمخارج أسفل منها -->
+    <div id="tab1" class="tab-content active">
+      <div class="image-card">
+        <img src="makharij.jpg" alt="رسم المخارج الخمسة" class="main-image">
+        
+        <!-- أزرار المخارج تحت الصورة مباشرة -->
+        <div class="makharij-buttons-container">
+          <button class="makhraj-select-btn" onclick="selectMakhraj('khayshoom', this)">الْخَيْشُوم</button>
+          <button class="makhraj-select-btn" onclick="selectMakhraj('jouf', this)">الْجَوْف</button>
+          <button class="makhraj-select-btn" onclick="selectMakhraj('halq', this)">الْحَلْق</button>
+          <button class="makhraj-select-btn" onclick="selectMakhraj('shafatan', this)">الشَّفَتَان</button>
+          <button class="makhraj-select-btn" onclick="selectMakhraj('lisan', this)">اللِّسَان</button>
+        </div>
+      </div>
+
+      <section class="card">
+        <h2 id="makhraj-title">📌 اضغطي على أي مخرج من الأزرار أعلاه</h2>
+        <div id="makhraj-content">
+          <p class="hint-text">عند الضغط على المخرج تحت الصورة ستظهر حروفه والتفاصيل هنا فوراً.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- التبويب 2: الحروف -->
+    <div id="tab2" class="tab-content">
+      <section class="card">
+        <h2>🔤 اختر الحرف مباشرة:</h2>
+        <div id="all-letters-container" class="letters-list"></div>
+        <div id="direct-letter-info">
+          <p class="hint-text">اضغط على أي حرف من الأزرار أعلاه لفتح تفاصيله.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- التبويب 3: الصفات -->
+    <div id="tab3" class="tab-content">
+      <section class="card">
+        <div class="section-subtitle">📌 الصفات ذات الضد:</div>
+        <div class="grid-buttons">
+          <button class="sifa-btn" onclick="showSifaDetails('الهمس والجهر', this)">الهمس ⚡ الجهر</button>
+          <button class="sifa-btn" onclick="showSifaDetails('الشدة والرخاوة والتوسط', this)">الشدة والتوسط ⚡ الرخاوة</button>
+          <button class="sifa-btn" onclick="showSifaDetails('الاستعلاء والاستفال', this)">الاستعلاء ⚡ الاستفال</button>
+          <button class="sifa-btn" onclick="showSifaDetails('الإطباق والانفتاح', this)">الإطباق ⚡ الانفتاح</button>
+        </div>
+
+        <div class="section-subtitle">📌 الصفات التي ليس لها ضد:</div>
+        <div class="grid-buttons-single">
+          <button class="sifa-btn" onclick="showSifaDetails('الصفير', this)">الصفير</button>
+          <button class="sifa-btn" onclick="showSifaDetails('القلقلة', this)">القلقلة</button>
+          <button class="sifa-btn" onclick="showSifaDetails('التفشي', this)">التفشي</button>
+          <button class="sifa-btn" onclick="showSifaDetails('الاستطالة', this)">الاستطالة</button>
+          <button class="sifa-btn" onclick="showSifaDetails('اللين', this)">اللين</button>
+          <button class="sifa-btn" onclick="showSifaDetails('الانحراف والتكرير', this)">الانحراف والتكرير</button>
+        </div>
+
+        <div id="sifa-info-box">
+          <p class="hint-text">اضغط على أي صفة من القائمة لعرض تفاصيلها واللحن الشائع منها.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- التبويب 4: تدريبات اختبار Google Forms (20 سؤالاً) -->
+    <div id="tab4" class="tab-content">
+      <div id="score-banner" class="score-banner"></div>
+
+      <form id="quiz-form" onsubmit="evaluateQuiz(event)">
+        <!-- الأسئلة من 1 إلى 20 -->
+        <div class="form-card">
+          <div class="form-question">1. ما هو مخرج حرف "القاف (ق)"؟</div>
+          <label class="form-option"><input type="radio" name="q1" value="A"> أقصى الحلق</label>
+          <label class="form-option"><input type="radio" name="q1" value="B"> أقصى اللسان مع ما يحاذيه من الحنك الأعلى</label>
+          <label class="form-option"><input type="radio" name="q1" value="C"> الشفتان بانطباق</label>
+          <div id="fb-q1"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">2. أي من الحروف التالية يخرج من "الخيشوم"؟</div>
+          <label class="form-option"><input type="radio" name="q2" value="A"> الغنة (الملازمة للنُّون والمِيم)</label>
+          <label class="form-option"><input type="radio" name="q2" value="B"> حروف المد الثلاثة</label>
+          <label class="form-option"><input type="radio" name="q2" value="C"> حرف الفاء</label>
+          <div id="fb-q2"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">3. ما هي الصفة الملازمة لحرف "الشين (ش)"؟</div>
+          <label class="form-option"><input type="radio" name="q3" value="A"> الاستطالة</label>
+          <label class="form-option"><input type="radio" name="q3" value="B"> التفشي</label>
+          <label class="form-option"><input type="radio" name="q3" value="C"> القلقلة</label>
+          <div id="fb-q3"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">4. حروف (خص ضغط قظ) هي حروف صفة:</div>
+          <label class="form-option"><input type="radio" name="q4" value="A"> الاستفال</label>
+          <label class="form-option"><input type="radio" name="q4" value="B"> الهمس</label>
+          <label class="form-option"><input type="radio" name="q4" value="C"> الاستعلاء (التفخيم)</label>
+          <div id="fb-q4"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">5. اللحن الشائع في حرف "الضاد (ض)" هو:</div>
+          <label class="form-option"><input type="radio" name="q5" value="A"> إبدالها ظاءً أو دالاً مفخمة</label>
+          <label class="form-option"><input type="radio" name="q5" value="B"> مخرجها من الخيشوم</label>
+          <label class="form-option"><input type="radio" name="q5" value="C"> جعلها حرفاً همسياً</label>
+          <div id="fb-q5"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">6. ما المخرج العام لحروف المد الثلاثة (الألف، الواو، الياء)؟</div>
+          <label class="form-option"><input type="radio" name="q6" value="A"> الجوف</label>
+          <label class="form-option"><input type="radio" name="q6" value="B"> الحلق</label>
+          <label class="form-option"><input type="radio" name="q6" value="C"> الشفتان</label>
+          <div id="fb-q6"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">7. الحروف التي تخرج من أقصى الحلق هي:</div>
+          <label class="form-option"><input type="radio" name="q7" value="A"> (غ ، خ)</label>
+          <label class="form-option"><input type="radio" name="q7" value="B"> (ع ، ح)</label>
+          <label class="form-option"><input type="radio" name="q7" value="C"> (أ ، هـ)</label>
+          <div id="fb-q7"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">8. ما صفة حرف "الضاد" الخاصة التي لا تشاركه فيها باقي الحروف؟</div>
+          <label class="form-option"><input type="radio" name="q8" value="A"> الاستطالة</label>
+          <label class="form-option"><input type="radio" name="q8" value="B"> الصفير</label>
+          <label class="form-option"><input type="radio" name="q8" value="C"> الانحراف</label>
+          <div id="fb-q8"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">9. تجمع حروف "الهمس" في كلمة:</div>
+          <label class="form-option"><input type="radio" name="q9" value="A"> قطب جد</label>
+          <label class="form-option"><input type="radio" name="q9" value="B"> فحثه شخص سكت</label>
+          <label class="form-option"><input type="radio" name="q9" value="C"> أجد قط بكت</label>
+          <div id="fb-q9"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">10. حرف "الفاء (ف)" يخرج من:</div>
+          <label class="form-option"><input type="radio" name="q10" value="A"> بانطباق الشفتين</label>
+          <label class="form-option"><input type="radio" name="q10" value="B"> بطن الشفة السفلى مع أطراف الثنايا العليا</label>
+          <label class="form-option"><input type="radio" name="q10" value="C"> أقصى اللسان</label>
+          <div id="fb-q10"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">11. صفة "الصفير" توجد في الحروف التالية:</div>
+          <label class="form-option"><input type="radio" name="q11" value="A"> (ص ، ز ، س)</label>
+          <label class="form-option"><input type="radio" name="q11" value="B"> (ط ، د ، ت)</label>
+          <label class="form-option"><input type="radio" name="q11" value="C"> (ظ ، ذ ، ث)</label>
+          <div id="fb-q11"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">12. ما معنى صفة "الشدة"؟</div>
+          <label class="form-option"><input type="radio" name="q12" value="A"> جريان الصوت عند النطق بالحرف</label>
+          <label class="form-option"><input type="radio" name="q12" value="B"> انحباس الصوت عند النطق بالحرف لكمال الإعتماد على المخرج</label>
+          <label class="form-option"><input type="radio" name="q12" value="C"> انتشار الهواء داخل الفم</label>
+          <div id="fb-q12"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">13. حروف صفة "القلقلة" هي:</div>
+          <label class="form-option"><input type="radio" name="q13" value="A"> (لن عمر)</
+          >
+          <label class="form-option"><input type="radio" name="q14" value="C"> (خص ضغط قظ)</label>
+          <div id="fb-q14"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">15. حرف "الراء (ر)" يوجد فيه صفة نهي عنها التكلف، وهي:</div>
+          <label class="form-option"><input type="radio" name="q15" value="A"> التكرير</label>
+          <label class="form-option"><input type="radio" name="q15" value="B"> الاستطالة</label>
+          <label class="form-option"><input type="radio" name="q15" value="C"> القلقلة</label>
+          <div id="fb-q15"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">16. يخرج حرفا "العين والحاء" من:</div>
+          <label class="form-option"><input type="radio" name="q16" value="A"> أقصى الحلق</label>
+          <label class="form-option"><input type="radio" name="q16" value="B"> وسط الحلق</label>
+          <label class="form-option"><input type="radio" name="q16" value="C"> أدنى الحلق</label>
+          <div id="fb-q16"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">17. يخرج من أقصى اللسان تحت مخرج القاف قليلاً حرف:</div>
+          <label class="form-option"><input type="radio" name="q17" value="A"> الكاف (ك)</label>
+          <label class="form-option"><input type="radio" name="q17" value="B"> الجيم (ج)</label>
+          <label class="form-option"><input type="radio" name="q17" value="C"> الخاء (خ)</label>
+          <div id="fb-q17"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">18. صفة "الانحراف" تثبت لحرفين هما:</div>
+          <label class="form-option"><input type="radio" name="q18" value="A"> اللام والراء</label>
+          <label class="form-option"><input type="radio" name="q18" value="B"> النون والميم</label>
+          <label class="form-option"><input type="radio" name="q18" value="C"> الباء والفاء</label>
+          <div id="fb-q18"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">19. من أسباب اللحن الشائع في حرف "الكاف" الساكنة:</div>
+          <label class="form-option"><input type="radio" name="q19" value="A"> المبالغة في همسها حتى تشبه السين</label>
+          <label class="form-option"><input type="radio" name="q19" value="B"> نطقها بغنة خيشومية</label>
+          <label class="form-option"><input type="radio" name="q19" value="C"> قلقلتها بقوة</label>
+          <div id="fb-q19"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-question">20. حروف الإطباق الأربعة هي:</div>
+          <label class="form-option"><input type="radio" name="q20" value="A"> (ص ، ض ، ط ، ظ)</label>
+          <label class="form-option"><input type="radio" name="q20" value="B"> (ق ، ك ، ج ، ش)</label>
+          <label class="form-option"><input type="radio" name="q20" value="C"> (أ ، هـ ، ع ، ح)</label>
+          <div id="fb-q20"></div>
+        </div>
+
+        <button type="submit" class="form-submit-btn">📩 إرسال وعرض النتيجة</button>
+      </form>
+    </div>
+  <script>
+    // ---------------- تسلسل ظهور شاشة الترحيب ----------------
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => document.getElementById('step-1').classList.add('show'), 500);
+      setTimeout(() => {
+        document.getElementById('step-2').classList.add('show');
+        document.getElementById('step-2-teacher').classList.add('show');
+      }, 2000);
+      setTimeout(() => document.getElementById('step-3').classList.add('show'), 3800);
+      setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        splash.style.opacity = '0';
+        splash.style.visibility = 'hidden';
+      }, 6000);
+
+      renderTab2Letters();
+    });
+
+    // ---------------- التنقل بين التبويبات ----------------
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      
+      btn.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // ---------------- بيانات الحروف والمخارج ----------------
+    const lettersData = {
+      "أ": { makhraj: "أقصى الحلق (أبعده عن الفم)", sifas: "الجهر، الشدة، الاستفال، الانفتاح", error: "تسهيلها وحذفها عند تجاورها أو الوقف عليها." },
+      "هـ": { makhraj: "أقصى الحلق (مع ما يحاديه)", sifas: "الهمس، الرخاوة، الاستفال، الانفتاح، الخفاء", error: "إخفاؤها وضعف صوتها لشدة خفائها." },
+      "ع": { makhraj: "وسط الحلق", sifas: "الجهر، التوسط (البينية)، الاستفال، الانفتاح", error: "عصرها بشدة فتخرج كالمخنوقة، أو إبدالها بحرف الحاء." },
+      "ح": { makhraj: "وسط الحلق", sifas: "الهمس، الرخاوة، الاستفال، الانفتاح", error: "مخرجها قسري وتفخيمها عند مجاورة حرف مفخم." },
+      "غ": { makhraj: "أدنى الحلق (أقربه إلى الفم)", sifas: "الجهر، الرخاوة، الاستعلاء، الانفتاح", error: "خلط صوتها بالخاء، أو عدم بيان جهرها." },
+      "خ": { makhraj: "أدنى الحلق", sifas: "الهمس، الرخاوة، الاستعلاء، الانفتاح", error: "مَزْجُ صوتها بالغين أو المبالغة في تحشريجها." },
+      "ق": { makhraj: "أقصى اللسان مع ما يحاذيه من الحنك الأعلى", sifas: "الجهر، الشدة، الاستعلاء، الانفتاح، القلقلة", error: "خلطها بالكاف أو النطق بها كالجيم العامية." },
+      "ك": { makhraj: "أقصى اللسان تحت مخرج القاف قليلاً", sifas: "الهمس، الشدة، الاستفال، الانفتاح", error: "المبالغة في همسها حتى تشبه السين." },
+      "ج": { makhraj: "وسط اللسان مع ما يحاذيه من الحنك الأعلى", sifas: "الجهر، الشدة، الاستفال، الانفتاح، القلقلة", error: "جريان النفس معها فتخرج كالشين." },
+      "ش": { makhraj: "وسط اللسان مع الحنك الأعلى", sifas: "الهمس، الرخاوة، الاستفال، الانفتاح، التفشي", error: "إخراج الهواء بكثرة زائدة عن التفشي الطبيعي." },
+      "ي": { makhraj: "وسط اللسان مع الحنك الأعلى", sifas: "الجهر، الرخاوة، الاستفال، الانفتاح (واللين إذا سكنت وانفتح ما قبلها)", error: "إخراج صوتها من الخيشوم (غُنّتها) عند المد." },
+      "ض": { makhraj: "إحدى حافتي اللسان أو كلاهما مع الأضراس العليا", sifas: "الجهر، الرخاوة، الاستعلاء، الإطباق، الاستطالة", error: "إبدالها ظاءً أو دالاً مفخمة." },
+      "ط": { makhraj: "طرف اللسان مع أصول الثنايا العليا", sifas: "الجهر، الشدة، الاستعلاء، الإطباق، القلقلة", error: "تحويلها إلى تاء أو سلب الاستعلاء منها." },
+      "ظ": { makhraj: "طرف اللسان مع أطراف الثنايا العليا", sifas: "الجهر، الرخاوة، الاستعلاء، الإطباق", error: "عدم إخراج طرف اللسان فتتحول إلى زاي مفخمة." },
+      "ف": { makhraj: "بطن الشفة السفلى مع أطراف الثنايا العليا", sifas: "الهمس، الرخاوة، الاستفال، الانفتاح", error: "نطقها كـ (V) الإنجليزية بضغط الشفتين معاً." },
+      "ب": { makhraj: "بانطباق الشفتين", sifas: "الجهر، الشدة، الاستفال، الانفتاح، القلقلة", error: "جريان النفس معها فتصبح كـ (P) أو ضعف القلقلة." },
+      "م": { makhraj: "بانطباق الشفتين مع غنة من الخيشوم", sifas: "الجهر، التوسط (البينية)، الاستفال، الانفتاح، الغنة", error: "زيادة زمنها عند الحركة أو إخفاء صوتها." },
+      "و": { makhraj: "بانضمام الشفتين مع ترك فرجة", sifas: "الجهر، الرخاوة، الاستفال، الانفتاح (واللين إذا سكنت وانفتح ما قبلها)", error: "عدم إتمام ضم الشفتين أو نطقها بغنة." },
+      "حروف المد": { makhraj: "مخرج الجوف المقدر (الألف والواو والياء المدية)", sifas: "الجهر، الرخاوة، الاستفال، الانفتاح، الخفاء", error: "إخراج صوتها مع غنة من الخيشوم." },
+      "غنة": { makhraj: "تجويف الخيشوم", sifas: "صفة تابعة للنُّون والمِيم (مُلازِمة لهما)", error: "تقليل زمنها في المشدد أو زيادة زمنها في المتحرك." }
+    };
+
+    const mainCategories = {
+      "halq": ["أ", "هـ", "ع", "ح", "غ", "خ"],
+      "lisan": ["ق", "ك", "ج", "ش", "ي", "ض", "ط", "ظ"],
+      "shafatan": ["ف", "ب", "م", "و"],
+      "khayshoom": ["غنة"],
+      "jouf": ["حروف المد"]
+    };
+
+    const categoriesNames = {
+      "khayshoom": "الْخَيْشُوم",
+      "jouf": "الْجَوْف",
+      "halq": "الْحَلْق",
+      "shafatan": "الشَّفَتَان",
+      "lisan": "اللِّسَان"
+    };
+
+    // ---------------- التبويب 1: المخارج تحت الصورة ----------------
+    function selectMakhraj(catId, btnElem) {
+      document.querySelectorAll('.makhraj-select-btn').forEach(el => el.classList.remove('active-btn'));
+      if (btnElem) btnElem.classList.add('active-btn');
+
+      const letters = mainCategories[catId];
+      const buttonsHtml = letters.map(l => `<button class="letter-btn" onclick="showLetterDetails('${l}', this)">${l}</button>`).join('');
+
+      document.getElementById('makhraj-title').innerText = `📌 مخرج: ${categoriesNames[catId]}`;
+      document.getElementById('makhraj-content').innerHTML = `
+        <p style="margin-bottom:8px; font-weight:bold; color:var(--primary);">حروف هذا المخرج:</p>
+        <div class="letters-list">${buttonsHtml}</div>
+        <div id="letter-info" class="hint-text">اضغط على أي حرف من الأزرار أعلاه لعرض التفاصيل.</div>
+      `;
+    }
+
+    function showLetterDetails(letter, btnElement) {
+      document.querySelectorAll('#makhraj-content .letter-btn').forEach(b => b.classList.remove('selected'));
+      btnElement.classList.add('selected');
+
+      const info = lettersData[letter];
+
+      document.getElementById('letter-info').innerHTML = `
+        <div class="details-box">
+          <strong>🔹 المخرج للحرف (${letter}):</strong><br>${info.makhraj}<br><br>
+          <strong>✨ صفات الحرف:</strong><br>${info.sifas}
+        </div>
+        <div class="error-box">
+          <strong>⚠️ اللحن الشائع للحرف (${letter}):</strong><br>${info.error}
+        </div>
+      `;
+    }
+
+    // ---------------- التبويب 2 ----------------
+    function renderTab2Letters() {
+      const container = document.getElementById('all-letters-container');
+      const allLetters = Object.keys(lettersData);
+      
+      container.innerHTML = allLetters.map(l => 
+        `<button class="letter-btn" onclick="showTab2LetterDetails('${l}', this)">${l}</button>`
+      ).join('');
+    }
+
+    function showTab2LetterDetails(letter, btnElement) {
+      document.querySelectorAll('#all-letters-container .letter-btn').forEach(b => b.classList.remove('selected'));
+      btnElement.classList.add('selected');
+
+      const info = lettersData[letter];
+
+      document.getElementById('direct-letter-info').innerHTML = `
+        <div class="details-box">
+          <strong>🔹 مخرج الحرف (${letter}):</strong><br>${info.makhraj}<br><br>
+          <strong>✨ صفات الحرف:</strong><br>${info.sifas}
+        </div>
+        <div class="error-box">
+          <strong>⚠️ اللحن الشائع للحرف (${letter}):</strong><br>${info.error}
+        </div>
+      `;
+    }
+
+    // ---------------- التبويب 3 ----------------
+    const صفات_مفصلة = {
+      "الهمس والجهر": {
+        desc: "جريان النفس أو انحباسه عند النطق بالحرف.",
+        details: "• <strong>الهمس (جريان النفس):</strong> حروفه (فَحَثَّهُ شَخْصٌ سَكَتَ).<br>• <strong>الجهر (انحباس النفس):</strong> باقي الحروف الجوفية والمشافهة.",
+        error: "المبالغة في همس الكاف والتاء حتى تشبه السين، أو ترك الهمس تماماً فيبدو الحرف كالمكتوم."
+      },
+      "الشدة والرخاوة والتوسط": {
+        desc: "جريان الصوت أو انحباسه أو توسطه.",
+        details: "• <strong>الشدة (انحباس الصوت):</strong> (أَجِدُ قَطٍ بَكَتْ).<br>• <strong>التوسط (بينية الصوت):</strong> (لِنْ عُمَر).<br>• <strong>الرخاوة (جريان الصوت):</strong> باقي الحروف.",
+        error: "قصر زمن الحرف الرخو الساكن (كالسين والشين) أو حبس صوت حروف التوسط ومساواتها بالشديدة."
+      },
+      "الاستعلاء والاستفال": {
+        desc: "اتجاه الضغط وصعود اللسان إلى الحنك الأعلى أو انخفاضه.",
+        details: "• <strong>الاستعلاء (التفخيم):</strong> (خُصَّ ضَغْطٍ قِظْ).<br>• <strong>الاستفال (الترقيق):</strong> باقي الحروف.",
+        error: "ترقيق المفخم عند الكسر، أو تفخيم المرقق إذا جاء مجاوراً لحرف مفخم (مثل تفخيم الألف في 'قال')."
+      },
+      "الإطباق والانفتاح": {
+        desc: "تلاصق اللسان بالحنك الأعلى أو افتراقه عنه.",
+        details: "• <strong>الإطباق:</strong> (ص، ض، ط، ظ).<br>• <strong>الانفتاح:</strong> باقي الحروف.",
+        error: "عدم إطباق طائفة من اللسان في الطاء فيسلب منها قوة التفخيم وتصبح شبيهة بالتاء."
+      },
+      "الصفير": {
+        desc: "صوت زائد يخرج من بين الثنايا واللسان عند النطق بحروفه.",
+        details: "• <strong>حروفه:</strong> (ص، ز، س).",
+        error: "المبالغة في إخراج حدة الصفير كالصفير الصريح، أو كتم الصوت فلا يتضح الحرف."
+      },
+      "القلقلة": {
+        desc: "اضطراب المخرج عند النطق بالحرف الساكن ليسمع له نبرة قوية.",
+        details: "• <strong>حروفها:</strong> (قُطْبُ جَدٍ).",
+        error: "خلط القلقلة بحركة كأن تميل للفتح أو الكسر، أو المبالغة التكلفية عند الوقف."
+      },
+      "التفشي": {
+        desc: "انتشار الهواء داخل الفم عند النطق بالحرف.",
+        details: "• <strong>حرفه:</strong> الشين (ش).",
+        error: "حصر الهواء بتقديم مخرج الشين نحو الأسنان الأمامية فتخرج ضعيقة التفشي."
+      },
+      "الاستطالة": {
+        desc: "امتداد الصوت من أول حافة اللسان إلى آخرها.",
+        details: "• <strong>حرفها:</strong> الضاد (ض).",
+        error: "عدم إعطاء وقت لاستطالة الضاد مما تؤدي لإبدالها ظاءً أو دالاً مفخمة."
+      },
+      "اللين": {
+        desc: "إخراج الحرف بسهولة دون تكلف على اللسان.",
+        details: "• <strong>حرفاه:</strong> الواو والياء الساكنتان المفتوح ما قبلهما.",
+        error: "ضغط المخرج بشدة عند النطق بهما أو مدّهما أكثر من حقّهما الطبيعي."
+      },
+      "الانحراف والتكرير": {
+        desc: "ميل الحرف عن مخرجه (الانحراف) أو ارتعاد طرف اللسان (التكرير).",
+        details: "• <strong>الانحراف:</strong> اللام والراء (ل، ر).<br>• <strong>التكرير:</strong> الراء (ر).",
+        error: "المبالغة في تكرير الراء حتى تخرج أكثر من راء، أو إخفاء التكرير كلياً فتصبح كالواو."
+      }
+    };
+
+    function showSifaDetails(sifaKey, btnElement) {
+      document.querySelectorAll('.sifa-btn').forEach(b => b.classList.remove('selected'));
+      btnElement.classList.add('selected');
+
+      const data = صفات_مفصلة[sifaKey];
+
+      document.getElementById('sifa-info-box').innerHTML = `
+        <div class="details-box">
+          <strong>🔹 بيان صفة (${sifaKey}):</strong><br>${data.desc}<br><br>
+          ${data.details}
+        </div>
+        <div class="error-box">
+          <strong>⚠️ اللحن الشائع:</strong><br>${data.error}
+        </div>
+      `;
+    }
+
+    // ---------------- التبويب 4: تصحيح الـ 20 سؤالاً ----------------
+    const correctAnswers = {
+      q1: { ans: "B", text: "أقصى اللسان مع ما يحاذيه من الحنك الأعلى" },
+      q2: { ans: "A", text: "الغنة (الملازمة للنُّون والمِيم)" },
+      q3: { ans: "B", text: "التفشي" },
+      q4: { ans: "C", text: "الاستعلاء (التفخيم)" },
+      q5: { ans: "A", text: "إبدالها ظاءً أو دالاً مفخمة" },
+      q6: { ans: "A", text: "الجوف" },
+      q7: { ans: "C", text: "(أ ، هـ)" },
+      q8: { ans: "A", text: "الاستطالة" },
+      q9: { ans: "B", text: "فحثه شخص سكت" },
+      q10: { ans: "B", text: "بطن الشفة السفلى مع أطراف الثنايا العليا" },
+      q11: { ans: "A", text: "(ص ، ز ، س)" },
+      q12: { ans: "B", text: "انحباس الصوت عند النطق بالحرف لكمال الإعتماد على المخرج" },
+      q13: { ans: "B", text: "(قطب جد)" },
+      q14: { ans: "A", text: "(لن عمر)" },
+      q15: { ans: "A", text: "التكرير" },
+      q16: { ans: "B", text: "وسط الحلق" },
+      q17: { ans: "A", text: "الكاف (ك)" },
+      q18: { ans: "A", text: "اللام والراء" },
+      q19: { ans: "A", text: "المبالغة في همسها حتى تشبه السين" },
+      q20: { ans: "A", text: "(ص ، ض ، ط ، ظ)" }
+    };
+
+    function evaluateQuiz(e) {
+      e.preventDefault();
+      let score = 0;
+      const totalQuestions = 20;
+      const formData = new FormData(e.target);
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const qKey = "q" + i;
+        const userAns = formData.get(qKey);
+        const fbContainer = document.getElementById("fb-" + qKey);
+
+        if (!userAns) {
+          fbContainer.innerHTML = `<div class="feedback-wrong">⚠️ لم تقمي بالإجابة! الإجابة الصحيحة: (${correctAnswers[qKey].text})</div>`;
+        } else if (userAns === correctAnswers[qKey].ans) {
+          score++;
+          fbContainer.innerHTML = `<div class="feedback-correct">✅ إجابة صحيحة!</div>`;
+        } else {
+          fbContainer.innerHTML = `<div class="feedback-wrong">❌ إجابة خاطئة. الإجابة الصحيحة: (${correctAnswers[qKey].text})</div>`;
+        }
+      }
+
+      const scoreBanner = document.getElementById('score-banner');
+      scoreBanner.style.display = 'block';
+      scoreBanner.innerHTML = `🏆 النتيجة النهائبة: ${score} من ${totalQuestions}`;
+      scoreBanner.scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
